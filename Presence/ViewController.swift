@@ -13,11 +13,22 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     // MARK: Outlets
 
+    @IBOutlet var debugText: UITextView!
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var tabBar: UITabBar!
 
     // MARK: Properties
 
+    @IBAction func handleClick(_ sender: UIButton) {
+        originPosition.x = facePosition.x;
+        originPosition.y = facePosition.y;
+        originPosition.z = facePosition.z;
+        originQuaternion.x = faceQuaternion.x;
+        originQuaternion.y = faceQuaternion.y;
+        originQuaternion.z = faceQuaternion.z;
+        originQuaternion.w = faceQuaternion.w;
+    }
+    
     var contentControllers: [VirtualContentType: VirtualContentController] = [:]
     
     var selectedVirtualContent: VirtualContentType! {
@@ -48,6 +59,11 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     var currentFaceAnchor: ARFaceAnchor?
     
+    var facePosition = SCNVector3();
+    var faceQuaternion = SCNQuaternion();
+    var originPosition = SCNVector3();
+    var originQuaternion = SCNQuaternion();
+    
     // MARK: - View Controller Life Cycle
 
     override func viewDidLoad() {
@@ -58,7 +74,7 @@ class ViewController: UIViewController, ARSessionDelegate {
         sceneView.automaticallyUpdatesLighting = true
         
         // Set the initial face content.
-        tabBar.selectedItem = tabBar.items!.first!
+        tabBar.selectedItem = tabBar.items![1];
         selectedVirtualContent = VirtualContentType(rawValue: tabBar.selectedItem!.tag)
     }
 
@@ -140,6 +156,32 @@ extension ViewController: ARSCNViewDelegate {
             let contentNode = selectedContentController.contentNode,
             contentNode.parent == node
             else { return }
+        
+        let x = contentNode.worldPosition.x;
+        let y = contentNode.worldPosition.y;
+        let z = contentNode.worldPosition.z;
+        let qw = contentNode.worldOrientation.w;
+        let qx = contentNode.worldOrientation.x;
+        let qy = contentNode.worldOrientation.y;
+        let qz = contentNode.worldOrientation.z;
+        
+        facePosition.x = x;
+        facePosition.y = y;
+        facePosition.z = z;
+        faceQuaternion.x = qx;
+        faceQuaternion.y = qy;
+        faceQuaternion.z = qz;
+        faceQuaternion.w = qw;
+        
+        DispatchQueue.main.async {
+            let x_ = String(format: "%.03f", x);
+            let y_ = String(format: "%.03f", y);
+            let z_ = String(format: "%.03f", z);
+            let ox = String(format: "%.03f", self.originPosition.x);
+            let oy = String(format: "%.03f", self.originPosition.y);
+            let oz = String(format: "%.03f", self.originPosition.z);
+            self.debugText.text = #"x: \#(x_), y: \#(y_), z: \#(z_)"# + "\n" + #"x: \#(ox), y: \#(oy), z: \#(oz)"#;
+        }
         
         selectedContentController.renderer(renderer, didUpdate: contentNode, for: anchor)
     }
