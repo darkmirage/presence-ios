@@ -20,13 +20,7 @@ class ViewController: UIViewController, ARSessionDelegate {
     // MARK: Properties
 
     @IBAction func handleClick(_ sender: UIButton) {
-        originPosition.x = facePosition.x;
-        originPosition.y = facePosition.y;
-        originPosition.z = facePosition.z;
-        originQuaternion.x = faceQuaternion.x;
-        originQuaternion.y = faceQuaternion.y;
-        originQuaternion.z = faceQuaternion.z;
-        originQuaternion.w = faceQuaternion.w;
+        resetTracking();
     }
     
     var contentControllers: [VirtualContentType: VirtualContentController] = [:]
@@ -58,11 +52,6 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
     
     var currentFaceAnchor: ARFaceAnchor?
-    
-    var facePosition = SCNVector3();
-    var faceQuaternion = SCNQuaternion();
-    var originPosition = SCNVector3();
-    var originQuaternion = SCNQuaternion();
     
     // MARK: - View Controller Life Cycle
 
@@ -150,6 +139,27 @@ extension ViewController: ARSCNViewDelegate {
         }
     }
     
+    func quaternionToEuler(_ quaternion: SCNQuaternion) -> SCNVector3 {
+        let x = quaternion.x;
+        let y = quaternion.y;
+        let z = quaternion.z;
+        let w = quaternion.w;
+        let t0 = +2.0 * (w * x + y * z)
+        let t1 = +1.0 - 2.0 * (x * x + y * y)
+        let X = atan2(t0, t1)
+
+        var t2 = +2.0 * (w * y - z * x)
+        t2 = t2 > +1.0 ? +1.0 : t2
+        t2 = t2 < -1.0 ? -1.0 : t2
+        let Y = asin(t2)
+
+        let t3 = +2.0 * (w * z + x * y)
+        let t4 = +1.0 - 2.0 * (y * y + z * z)
+        let Z = atan2(t3, t4)
+
+        return SCNVector3(X, Y, Z);
+    }
+
     /// - Tag: ARFaceGeometryUpdate
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard anchor == currentFaceAnchor,
@@ -157,30 +167,26 @@ extension ViewController: ARSCNViewDelegate {
             contentNode.parent == node
             else { return }
         
-        let x = contentNode.worldPosition.x;
-        let y = contentNode.worldPosition.y;
-        let z = contentNode.worldPosition.z;
-        let qw = contentNode.worldOrientation.w;
-        let qx = contentNode.worldOrientation.x;
-        let qy = contentNode.worldOrientation.y;
-        let qz = contentNode.worldOrientation.z;
+        let position = contentNode.worldPosition;
+        let orientation = contentNode.worldOrientation;
+        let x = position.x;
+        let y = position.y;
+        let z = position.z;
         
-        facePosition.x = x;
-        facePosition.y = y;
-        facePosition.z = z;
-        faceQuaternion.x = qx;
-        faceQuaternion.y = qy;
-        faceQuaternion.z = qz;
-        faceQuaternion.w = qw;
+        let rotation = quaternionToEuler(orientation);
+        let X = rotation.x;
+        let Y = rotation.y;
+        let Z = rotation.z;
         
         DispatchQueue.main.async {
             let x_ = String(format: "%.03f", x);
             let y_ = String(format: "%.03f", y);
             let z_ = String(format: "%.03f", z);
-            let ox = String(format: "%.03f", self.originPosition.x);
-            let oy = String(format: "%.03f", self.originPosition.y);
-            let oz = String(format: "%.03f", self.originPosition.z);
-            self.debugText.text = #"x: \#(x_), y: \#(y_), z: \#(z_)"# + "\n" + #"x: \#(ox), y: \#(oy), z: \#(oz)"#;
+            let X_ = String(format: "%.02f", X);
+            let Y_ = String(format: "%.02f", Y);
+            let Z_ = String(format: "%.02f", Z);
+
+            self.debugText.text = #"x: \#(x_), y: \#(y_), z: \#(z_)"# + "\n" + #"rx: \#(X_), ry: \#(Y_), rz: \#(Z_)"#;
         }
         
         selectedContentController.renderer(renderer, didUpdate: contentNode, for: anchor)
