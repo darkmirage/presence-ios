@@ -43,3 +43,22 @@ extension SCNReferenceNode {
         }
     }
 }
+
+extension SCNQuaternion {
+    func toEuler() -> SCNVector3 {
+        let t0 = +2.0 * (w * x + y * z)
+        let t1 = +1.0 - 2.0 * (x * x + y * y)
+        let X = atan2(t0, t1)
+
+        var t2 = +2.0 * (w * y - z * x)
+        t2 = t2 > +1.0 ? +1.0 : t2
+        t2 = t2 < -1.0 ? -1.0 : t2
+        let Y = asin(t2)
+
+        let t3 = +2.0 * (w * z + x * y)
+        let t4 = +1.0 - 2.0 * (y * y + z * z)
+        let Z = atan2(t3, t4)
+
+        return SCNVector3(X, Y, Z);
+    }
+}

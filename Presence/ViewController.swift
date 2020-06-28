@@ -8,20 +8,33 @@ Main view controller for the AR experience.
 import ARKit
 import SceneKit
 import UIKit
-import WebRTC
+import ScClient
 
 class ViewController: UIViewController, ARSessionDelegate {
     
     // MARK: Outlets
 
-    @IBOutlet var debugText: UITextView!
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var tabBar: UITabBar!
-
+    @IBOutlet var connectButton: UIButton!
+    @IBOutlet var channelIdText: UITextField!
+    @IBOutlet var debugText: UILabel!
+    
+    private let config = Config.default;
+    
+    private let webRTCClient: WebRTCClient
+    private let scClient: ScClient;
+    
     // MARK: Properties
 
-    @IBAction func handleClick(_ sender: UIButton) {
-        resetTracking();
+    @IBAction func handleReset(_ sender: UIButton) {
+        resetTracking()
+    }
+    @IBAction func handleConnect(_ sender: UIButton) {
+        connectToWebRTC()
+    }
+    @IBAction func handleTap(_ sender: Any) {
+        self.channelIdText.resignFirstResponder()
     }
     
     var contentControllers: [VirtualContentType: VirtualContentController] = [:]
@@ -54,6 +67,22 @@ class ViewController: UIViewController, ARSessionDelegate {
     
     var currentFaceAnchor: ARFaceAnchor?
     
+    init() {
+        self.webRTCClient = WebRTCClient(iceServers: self.config.webRTCIceServers);
+        self.scClient = ScClient(url: self.config.signalingServerUrl)
+        super.init(nibName: String(describing: ViewController.self), bundle: Bundle.main)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        self.webRTCClient = WebRTCClient(iceServers: self.config.webRTCIceServers)
+        self.scClient = ScClient(url: self.config.signalingServerUrl)
+        super.init(coder: aDecoder)
+    }
+    
+    deinit {
+        self.scClient.disconnect()
+    }
+    
     // MARK: - View Controller Life Cycle
 
     override func viewDidLoad() {
@@ -64,8 +93,25 @@ class ViewController: UIViewController, ARSessionDelegate {
         sceneView.automaticallyUpdatesLighting = true
         
         // Set the initial face content.
-        tabBar.selectedItem = tabBar.items![1];
+        tabBar.selectedItem = tabBar.items![1]
         selectedVirtualContent = VirtualContentType(rawValue: tabBar.selectedItem!.tag)
+        
+        self.scClient.setBasicListener(onConnect: { (client: ScClient) in
+            print("Connected to server")
+        }, onConnectError: { (client: ScClient, error: Error?) in
+            print("Failed to connect to server due to ", error?.localizedDescription as Any)
+        }, onDisconnect: { (client: ScClient, error: Error?) in
+            print("Disconnected from server due to ", error?.localizedDescription as Any)
+        })
+        
+        self.scClient.setAuthenticationListener(onSetAuthentication: { (client: ScClient, token: String?) in
+            print("Authentication token:", token as Any)
+        }, onAuthentication: { (client: ScClient, isAuthenticated: Bool?) in
+            print("Authenticated is ", isAuthenticated as Any)
+            self.connectButton.isEnabled = true
+        })
+        
+        self.scClient.connect()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -77,6 +123,10 @@ class ViewController: UIViewController, ARSessionDelegate {
         
         // "Reset" to run the AR session for the first time.
         resetTracking()
+    }
+    
+    func connectToWebRTC() {
+        self.scClient.emit(eventName: "signal", data: [ "channelId": "wtf", "offer": "yo"] as AnyObject)
     }
 
     // MARK: - ARSessionDelegate
@@ -139,27 +189,6 @@ extension ViewController: ARSCNViewDelegate {
             node.addChildNode(contentNode)
         }
     }
-    
-    func quaternionToEuler(_ quaternion: SCNQuaternion) -> SCNVector3 {
-        let x = quaternion.x;
-        let y = quaternion.y;
-        let z = quaternion.z;
-        let w = quaternion.w;
-        let t0 = +2.0 * (w * x + y * z)
-        let t1 = +1.0 - 2.0 * (x * x + y * y)
-        let X = atan2(t0, t1)
-
-        var t2 = +2.0 * (w * y - z * x)
-        t2 = t2 > +1.0 ? +1.0 : t2
-        t2 = t2 < -1.0 ? -1.0 : t2
-        let Y = asin(t2)
-
-        let t3 = +2.0 * (w * z + x * y)
-        let t4 = +1.0 - 2.0 * (y * y + z * z)
-        let Z = atan2(t3, t4)
-
-        return SCNVector3(X, Y, Z);
-    }
 
     /// - Tag: ARFaceGeometryUpdate
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
@@ -174,7 +203,7 @@ extension ViewController: ARSCNViewDelegate {
         let y = position.y;
         let z = position.z;
         
-        let rotation = quaternionToEuler(orientation);
+        let rotation = orientation.toEuler()
         let X = rotation.x;
         let Y = rotation.y;
         let Z = rotation.z;
