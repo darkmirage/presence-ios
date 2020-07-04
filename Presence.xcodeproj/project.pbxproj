@@ -18,16 +18,14 @@
 		3929C4931E89EC2C00E00B60 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3929C4921E89EC2C00E00B60 /* Assets.xcassets */; };
 		3929C49F1E89EE4400E00B60 /* Models.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 3929C49E1E89EE4400E00B60 /* Models.scnassets */; };
 		39D8DC1B1E8ADAE600386B05 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 39D8DC1A1E8ADAE600386B05 /* LaunchScreen.storyboard */; };
+		50397CDF24A9ADF500B32AE6 /* PoseMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50397CDE24A9ADF500B32AE6 /* PoseMessage.swift */; };
 		50E1FDB024A84AD000B87863 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDAF24A84AD000B87863 /* WebRTCClient.swift */; };
 		50E1FDB924A84B3F00B87863 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDB824A84B3F00B87863 /* Config.swift */; };
 		50E1FDBB24A84CC700B87863 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDBA24A84CC700B87863 /* WebSocketClient.swift */; };
 		50E1FDBD24A84CEA00B87863 /* WebSocketProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDBC24A84CEA00B87863 /* WebSocketProvider.swift */; };
-		50E1FDBF24A84E8300B87863 /* SignalingClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDBE24A84E8300B87863 /* SignalingClient.swift */; };
-		50E1FDC524A84F0100B87863 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDC424A84F0100B87863 /* Message.swift */; };
-		50E1FDCA24A84F8200B87863 /* IceCandidate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDC724A84F8200B87863 /* IceCandidate.swift */; };
 		50E1FDCB24A84F8200B87863 /* RTCStates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDC824A84F8200B87863 /* RTCStates.swift */; };
-		50E1FDCC24A84F8200B87863 /* SessionDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDC924A84F8200B87863 /* SessionDescription.swift */; };
-		50E1FDCF24A8535000B87863 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; productRef = 50E1FDCE24A8535000B87863 /* SwiftPackageProductDependency */; };
+		50E1FDCF24A8535000B87863 /* ScClient in Frameworks */ = {isa = PBXBuildFile; productRef = 50E1FDCE24A8535000B87863 /* ScClient */; };
+		50E1FDD124A9307B00B87863 /* SignalMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FDD024A9307B00B87863 /* SignalMessage.swift */; };
 		C81DA0C61F4CC79A002AF1DA /* FaceOcclusionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81DA0C51F4CC79A002AF1DA /* FaceOcclusionOverlay.swift */; };
 		C8904E551F4CFD000089E530 /* VirtualContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8904E541F4CFD000089E530 /* VirtualContent.swift */; };
 		C8904E571F4CFD730089E530 /* TexturedFace.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8904E561F4CFD730089E530 /* TexturedFace.swift */; };
@@ -50,15 +48,13 @@
 		3929C4971E89EC2C00E00B60 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3929C49E1E89EE4400E00B60 /* Models.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = Models.scnassets; sourceTree = "<group>"; };
 		39D8DC1A1E8ADAE600386B05 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		50397CDE24A9ADF500B32AE6 /* PoseMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseMessage.swift; sourceTree = "<group>"; };
 		50E1FDAF24A84AD000B87863 /* WebRTCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCClient.swift; sourceTree = "<group>"; };
 		50E1FDB824A84B3F00B87863 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		50E1FDBA24A84CC700B87863 /* WebSocketClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketClient.swift; sourceTree = "<group>"; };
 		50E1FDBC24A84CEA00B87863 /* WebSocketProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketProvider.swift; sourceTree = "<group>"; };
-		50E1FDBE24A84E8300B87863 /* SignalingClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalingClient.swift; sourceTree = "<group>"; };
-		50E1FDC424A84F0100B87863 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
-		50E1FDC724A84F8200B87863 /* IceCandidate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IceCandidate.swift; sourceTree = "<group>"; };
 		50E1FDC824A84F8200B87863 /* RTCStates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RTCStates.swift; sourceTree = "<group>"; };
-		50E1FDC924A84F8200B87863 /* SessionDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionDescription.swift; sourceTree = "<group>"; };
+		50E1FDD024A9307B00B87863 /* SignalMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalMessage.swift; sourceTree = "<group>"; };
 		71398A526BE880F713961338 /* libPods-Presence.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Presence.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		78367D5517A15F802AA4D87B /* Pods-Presence.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Presence.release.xcconfig"; path = "Pods/Target Support Files/Pods-Presence/Pods-Presence.release.xcconfig"; sourceTree = "<group>"; };
 		A51C1467E68FA2B950926F70 /* LICENSE.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
@@ -74,7 +70,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6703E8A134EEE6556EFCC1C /* libPods-Presence.a in Frameworks */,
-				50E1FDCF24A8535000B87863 /* BuildFile in Frameworks */,
+				50E1FDCF24A8535000B87863 /* ScClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,8 +140,6 @@
 				50E1FDAF24A84AD000B87863 /* WebRTCClient.swift */,
 				50E1FDBA24A84CC700B87863 /* WebSocketClient.swift */,
 				50E1FDBC24A84CEA00B87863 /* WebSocketProvider.swift */,
-				50E1FDBE24A84E8300B87863 /* SignalingClient.swift */,
-				50E1FDC424A84F0100B87863 /* Message.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -153,9 +147,9 @@
 		50E1FDC624A84F4400B87863 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				50E1FDC724A84F8200B87863 /* IceCandidate.swift */,
 				50E1FDC824A84F8200B87863 /* RTCStates.swift */,
-				50E1FDC924A84F8200B87863 /* SessionDescription.swift */,
+				50E1FDD024A9307B00B87863 /* SignalMessage.swift */,
+				50397CDE24A9ADF500B32AE6 /* PoseMessage.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -209,7 +203,7 @@
 			);
 			name = Presence;
 			packageProductDependencies = (
-				50E1FDCE24A8535000B87863 /* SwiftPackageProductDependency */,
+				50E1FDCE24A8535000B87863 /* ScClient */,
 			);
 			productName = ARKitFaceExample;
 			productReference = 3929C4881E89EC2C00E00B60 /* Presence.app */;
@@ -235,16 +229,15 @@
 			};
 			buildConfigurationList = 3929C4831E89EC2C00E00B60 /* Build configuration list for PBXProject "Presence" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 			);
 			mainGroup = 3929C47F1E89EC2C00E00B60;
 			packageReferences = (
-				50E1FDCD24A8535000B87863 /* RemoteSwiftPackageReference */,
+				50E1FDCD24A8535000B87863 /* XCRemoteSwiftPackageReference "ScClient" */,
 			);
 			productRefGroup = 3929C4891E89EC2C00E00B60 /* Products */;
 			projectDirPath = "";
@@ -319,20 +312,18 @@
 			files = (
 				50E1FDBD24A84CEA00B87863 /* WebSocketProvider.swift in Sources */,
 				116FDD742130A6BD008404D3 /* TransformVisualization.swift in Sources */,
+				50E1FDD124A9307B00B87863 /* SignalMessage.swift in Sources */,
 				50E1FDB024A84AD000B87863 /* WebRTCClient.swift in Sources */,
 				50E1FDCB24A84F8200B87863 /* RTCStates.swift in Sources */,
 				50E1FDBB24A84CC700B87863 /* WebSocketClient.swift in Sources */,
 				50E1FDB924A84B3F00B87863 /* Config.swift in Sources */,
 				C81DA0C61F4CC79A002AF1DA /* FaceOcclusionOverlay.swift in Sources */,
+				50397CDF24A9ADF500B32AE6 /* PoseMessage.swift in Sources */,
 				11012C161F3D07BC0099F3A4 /* BlendShapeCharacter.swift in Sources */,
-				50E1FDBF24A84E8300B87863 /* SignalingClient.swift in Sources */,
 				3929C48E1E89EC2C00E00B60 /* ViewController.swift in Sources */,
 				3929C48C1E89EC2C00E00B60 /* AppDelegate.swift in Sources */,
 				C8904E551F4CFD000089E530 /* VirtualContent.swift in Sources */,
-				50E1FDCA24A84F8200B87863 /* IceCandidate.swift in Sources */,
-				50E1FDCC24A84F8200B87863 /* SessionDescription.swift in Sources */,
 				11764D981FB1344900D90F75 /* VideoTexturedFace.swift in Sources */,
-				50E1FDC524A84F0100B87863 /* Message.swift in Sources */,
 				11EE23D2213479CF00C0DEAD /* Utilities.swift in Sources */,
 				C8904E571F4CFD730089E530 /* TexturedFace.swift in Sources */,
 			);
@@ -537,7 +528,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		50E1FDCD24A8535000B87863 /* RemoteSwiftPackageReference */ = {
+		50E1FDCD24A8535000B87863 /* XCRemoteSwiftPackageReference "ScClient" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sacOO7/ScClient";
 			requirement = {
@@ -548,9 +539,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		50E1FDCE24A8535000B87863 /* SwiftPackageProductDependency */ = {
+		50E1FDCE24A8535000B87863 /* ScClient */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 50E1FDCD24A8535000B87863 /* RemoteSwiftPackageReference */;
+			package = 50E1FDCD24A8535000B87863 /* XCRemoteSwiftPackageReference "ScClient" */;
 			productName = ScClient;
 		};
 /* End XCSwiftPackageProductDependency section */

@@ -1,40 +1,71 @@
 /*
-See LICENSE folder for this sample’s licensing information.
-
-Abstract:
-Main view controller for the AR experience.
-*/
+ See LICENSE folder for this sample’s licensing information.
+ 
+ Abstract:
+ Main view controller for the AR experience.
+ */
 
 import ARKit
 import SceneKit
 import UIKit
 import ScClient
+import WebRTC
 
 class ViewController: UIViewController, ARSessionDelegate {
     
     // MARK: Outlets
-
+    
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var tabBar: UITabBar!
     @IBOutlet var connectButton: UIButton!
     @IBOutlet var channelIdText: UITextField!
     @IBOutlet var debugText: UILabel!
     
-    private let config = Config.default;
+    private let config = Config.default
+    private var webRTCClient: WebRTCClient {
+        didSet {
+            self.remoteCandidates = 0
+        }
+    }
+    private let scClient: ScClient
     
-    private let webRTCClient: WebRTCClient
-    private let scClient: ScClient;
+    private var remoteCandidates: Int = 0
+    
+    private var channelId: String = "" {
+        didSet {
+            DispatchQueue.main.async {
+                self.channelIdText.text = self.channelId
+            }
+            self.scClient.unsubscribe(channelName: "answer:" + oldValue)
+            self.scClient.unsubscribe(channelName: "icecandidate:" + oldValue)
+        }
+    }
+    
+    private var readyToConnect: Bool = false {
+        didSet {
+            DispatchQueue.main.async {
+                self.connectButton.isEnabled = self.readyToConnect
+                self.channelIdText.isEnabled = self.readyToConnect
+            }
+        }
+    }
+    
+    private var channelReady: Bool = false
     
     // MARK: Properties
-
+    
     @IBAction func handleReset(_ sender: UIButton) {
         resetTracking()
     }
     @IBAction func handleConnect(_ sender: UIButton) {
+        self.readyToConnect = false
         connectToWebRTC()
     }
     @IBAction func handleTap(_ sender: Any) {
         self.channelIdText.resignFirstResponder()
+    }
+    @IBAction func handleChannelIdChange(_ sender: Any) {
+        channelId = channelIdText.text ?? ""
     }
     
     var contentControllers: [VirtualContentType: VirtualContentController] = [:]
@@ -84,10 +115,11 @@ class ViewController: UIViewController, ARSessionDelegate {
     }
     
     // MARK: - View Controller Life Cycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        channelId = "RAVEN"
         sceneView.delegate = self
         sceneView.session.delegate = self
         sceneView.automaticallyUpdatesLighting = true
@@ -96,24 +128,10 @@ class ViewController: UIViewController, ARSessionDelegate {
         tabBar.selectedItem = tabBar.items![1]
         selectedVirtualContent = VirtualContentType(rawValue: tabBar.selectedItem!.tag)
         
-        self.scClient.setBasicListener(onConnect: { (client: ScClient) in
-            print("Connected to server")
-        }, onConnectError: { (client: ScClient, error: Error?) in
-            print("Failed to connect to server due to ", error?.localizedDescription as Any)
-        }, onDisconnect: { (client: ScClient, error: Error?) in
-            print("Disconnected from server due to ", error?.localizedDescription as Any)
-        })
-        
-        self.scClient.setAuthenticationListener(onSetAuthentication: { (client: ScClient, token: String?) in
-            print("Authentication token:", token as Any)
-        }, onAuthentication: { (client: ScClient, isAuthenticated: Bool?) in
-            print("Authenticated is ", isAuthenticated as Any)
-            self.connectButton.isEnabled = true
-        })
-        
-        self.scClient.connect()
+        resetWebRTCClient()
+        initializeSignal()
     }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -125,12 +143,8 @@ class ViewController: UIViewController, ARSessionDelegate {
         resetTracking()
     }
     
-    func connectToWebRTC() {
-        self.scClient.emit(eventName: "signal", data: [ "channelId": "wtf", "offer": "yo"] as AnyObject)
-    }
-
     // MARK: - ARSessionDelegate
-
+    
     func session(_ session: ARSession, didFailWithError error: Error) {
         guard error is ARError else { return }
         
@@ -178,7 +192,7 @@ extension ViewController: UITabBarDelegate {
 }
 
 extension ViewController: ARSCNViewDelegate {
-        
+    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         guard let faceAnchor = anchor as? ARFaceAnchor else { return }
         currentFaceAnchor = faceAnchor
@@ -189,7 +203,7 @@ extension ViewController: ARSCNViewDelegate {
             node.addChildNode(contentNode)
         }
     }
-
+    
     /// - Tag: ARFaceGeometryUpdate
     func renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) {
         guard anchor == currentFaceAnchor,
@@ -215,11 +229,135 @@ extension ViewController: ARSCNViewDelegate {
             let X_ = String(format: "%.02f", X);
             let Y_ = String(format: "%.02f", Y);
             let Z_ = String(format: "%.02f", Z);
-
+            
             self.debugText.text = #"x: \#(x_), y: \#(y_), z: \#(z_)"# + "\n" + #"rx: \#(X_), ry: \#(Y_), rz: \#(Z_)"#;
         }
         
         selectedContentController.renderer(renderer, didUpdate: contentNode, for: anchor)
+        
+        if channelReady {
+            let pose = PoseMessage(x: x, y: y, z: z, rx: X, ry: Y, rz: Z)
+            webRTCClient.sendData(pose.toJSONString()!.data(using: .ascii)!)
+        }
     }
 }
 
+extension ViewController {
+    func initializeSignal() {
+        self.scClient.setBasicListener(onConnect: onConnect, onConnectError: onConnectError, onDisconnect: onDisconnect)
+        self.scClient.setAuthenticationListener(onSetAuthentication: onSetAuthentication, onAuthentication: onAuthentication)
+        self.scClient.connect()
+    }
+    
+    func onConnect(client: ScClient) {
+        print("Connected to signalling server")
+    }
+    
+    func onConnectError(client: ScClient, error: Error?) {
+        print("Failed to connect to signalling server:", error?.localizedDescription as Any)
+    }
+    
+    func onDisconnect(client: ScClient, error: Error?) {
+        print("Disconnected from signalling server:", error?.localizedDescription as Any)
+    }
+    
+    func onSetAuthentication(client: ScClient, token: String?) {
+        print("Authentication token:", token as Any)
+    }
+    func onAuthentication(client: ScClient, isAuthenticated: Bool?) {
+        print("Authentication:", isAuthenticated as Any)
+        self.readyToConnect = true
+    }
+    
+    func resetWebRTCClient() {
+        self.webRTCClient = WebRTCClient(iceServers: self.config.webRTCIceServers)
+        self.webRTCClient.delegate = self
+    }
+    
+    func handleChannel(channelName: String, data: AnyObject?) {
+        if channelName.starts(with: "icecandidate") {
+            remoteCandidates += 1
+            if let c = (data as! NSDictionary)["candidate"] as! NSDictionary? {
+                let candidate = IceCandidate(from: c);
+                debugPrint("Received ICE candidate", remoteCandidates)
+                self.webRTCClient.set(remoteCandidate: candidate.rtcIceCandidate)
+            }
+        }
+    }
+    
+    func connectToWebRTC() {
+        self.resetWebRTCClient()
+        
+        self.scClient.onChannel(channelName: "icecandidate:" + self.channelId, ack: handleChannel)
+        self.scClient.subscribe(channelName: "icecandidate:" + self.channelId)
+        
+        self.scClient.emitAck(eventName: "signal", data: ["channelId": self.channelId] as AnyObject) { (eventName: String, error: AnyObject?, response: AnyObject?) in
+            if !(error is NSNull) {
+                debugPrint("Signal error:", error as AnyObject)
+                return
+            }
+            
+            if (response is NSNull) {
+                fatalError("No existing offers")
+            }
+            
+            debugPrint("Retrieved offer")
+            let signal = response as! NSDictionary
+            let existingOffer = signal["offer"] as! NSDictionary
+            let sdp = existingOffer["sdp"] as! String
+            let remoteSdp = RTCSessionDescription(type: .offer, sdp: sdp)
+            
+            self.webRTCClient.set(remoteSdp: remoteSdp) { (e: Error?) in
+                if let e_ = e {
+                    debugPrint("Error with remote SDP", e_ as AnyObject)
+                    return
+                }
+                self.webRTCClient.answer { (localSdP: RTCSessionDescription) in
+                    debugPrint("Sending answer")
+                    var answer = Offer(rtcSdp: localSdP)
+                    answer.type = "answer"
+                    self.scClient.publish(channelName: "answer:" + self.channelId, data: ["answer": answer.toJSON()] as AnyObject)
+                }
+            }
+        }
+    }
+}
+
+extension ViewController: WebRTCClientDelegate {
+    func webRTCClient(_ client: WebRTCClient, didDiscoverLocalCandidate candidate: RTCIceCandidate) {
+        let c = IceCandidate(from: candidate)
+        self.scClient.publish(channelName: "icecandidate:" + self.channelId, data: ["candidate" : c.toJSON()] as AnyObject)
+    }
+    
+    func webRTCClient(_ client: WebRTCClient, didChangeConnectionState state: RTCIceConnectionState) {
+        switch (state) {
+        case .connected:
+            self.channelReady = true
+            break
+        case .new:
+            break
+        case .checking:
+            break
+        case .completed:
+            break
+        case .failed:
+            break
+        case .disconnected:
+            self.readyToConnect = true
+            break
+        case .closed:
+            break
+        case .count:
+            break
+        @unknown default:
+            fatalError("Unknown state")
+        }
+        debugPrint("WebRTC connection state:", state as AnyObject)
+    }
+    
+    func webRTCClient(_ client: WebRTCClient, didReceiveData data: Data) {
+        debugPrint("data received", data)
+    }
+    
+    
+}

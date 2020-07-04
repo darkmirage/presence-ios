@@ -43,8 +43,8 @@ class TransformVisualization: NSObject, VirtualContentController {
         guard #available(iOS 12.0, *), let anchorNode = contentNode else { return }
         
         // Scale down the coordinate axis visualizations for eyes.
-        rightEyeNode.simdPivot = float4x4(diagonal: float4(3, 3, 3, 1))
-        leftEyeNode.simdPivot = float4x4(diagonal: float4(3, 3, 3, 1))
+        rightEyeNode.pivot = SCNMatrix4(m11: 3, m12: 0, m13: 0, m14: 0, m21: 0, m22: 3, m23: 0, m24: 0, m31: 0, m32: 0, m33: 3, m34: 0, m41: 0, m42: 0, m43: 0, m44: 1)
+        leftEyeNode.pivot = SCNMatrix4(m11: 3, m12: 0, m13: 0, m14: 0, m21: 0, m22: 3, m23: 0, m24: 0, m31: 0, m32: 0, m33: 3, m34: 0, m41: 0, m42: 0, m43: 0, m44: 1)
         
         anchorNode.addChildNode(rightEyeNode)
         anchorNode.addChildNode(leftEyeNode)
